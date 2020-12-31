@@ -1,37 +1,102 @@
 const capitalise = str => str.charAt(0).toUpperCase() + str.slice(1)
 
-class VesselQuantity {
-  constructor (number) {
+class Container {
+  constructor (number, liquid = 'beer') {
     this.number = number
+    this.liquid = liquid
   }
 
-  vessel () {
-    return this.number === 1 ? 'bottle' : 'bottles'
+  get type () {
+    return 'bottles'
   }
 
-  quantity () {
-    return this.number === 0 ? 'no more' : this.number.toString()
+  get quantity () {
+    return this.number.toString()
   }
 
-  action () {
-    return this.number === 0 ? 'Go to the store and buy some more' : 'Take one down and pass it around'
+  get action () {
+    return 'Take one down and pass it around'
   }
 
-  successor () {
-    return this.number === 0 ? 99 : this.number - 1
+  get successor () {
+    return factory(this.number - 1)
+  }
+
+  toString () {
+    return `${this.quantity} ${this.type} of ${this.liquid}`
+  }
+}
+class FinalContainer extends Container {
+  constructor () {
+    super(1)
+  }
+
+  get type () {
+    return 'bottle'
+  }
+}
+class Containerless extends Container {
+  get quantity () {
+    return 'no more'
+  }
+
+  get action () {
+    return 'Go to the store and buy some more'
+  }
+
+  get successor () {
+    return factory(99)
+  }
+}
+
+class SixPack extends Container {
+  get type () {
+    return 'six pack'
+  }
+
+  get quantity () {
+    return '1'
+  }
+
+  get action () {
+    return 'Take one down and pass it around'
+  }
+
+  get successor () {
+    return factory(5)
+  }
+}
+
+const factory = (number) => {
+  switch (number) {
+    case 6:
+      return new SixPack()
+    case 1:
+      return new FinalContainer()
+    case 0:
+      return new Containerless()
+    default:
+      return new Container(number)
   }
 }
 
 class Song {
-  sing () {
-    return [...Array(99 + 1).keys()].reverse().map(i => this.verse(i)).join('\n\n')
+  constructor (location = 'on the wall') {
+    this.location = location
   }
 
-  verse (number) {
-    const current = new VesselQuantity(number)
-    const successor = new VesselQuantity(current.successor())
-    return `${capitalise(current.quantity())} ${current.vessel()} of beer on the wall, ${current.quantity()} ${current.vessel()} of beer
-${current.action()}, ${successor.quantity()} ${successor.vessel()} of beer on the wall`
+  sing () {
+    return [...Array(99 + 1).keys()]
+      .reverse()
+      .map(i => this.verse(factory(i)))
+      .join('\n\n')
+  }
+
+  verse (container) {
+    return capitalise([
+      `${container} ${this.location}, ${container}`,
+      `${container.action}, ${container.successor} ${this.location}`
+    ].join('\n'))
   }
 }
 
